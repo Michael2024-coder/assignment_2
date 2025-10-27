@@ -16,7 +16,7 @@ class DiceHand:
         left_value = self.left_die.roll()
         right_value = self.right_die.roll()
         return left_value, right_value
-       
+
     def evaluate_roll(self) -> dict[str, object]:
         """Evaluate the result of the roll according to game rules."""
         left_value, right_value = self.roll()
