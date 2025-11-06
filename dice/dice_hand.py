@@ -1,7 +1,8 @@
 """Module for managing a pair of dice in the Two-Dice Pig game."""
-
+import sys
+from pathlib import Path
 from dice.dice_class import Dice
-
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 class DiceHand:
     """Manages two dice and evaluates roll outcomes for Two-Dice Pig."""
