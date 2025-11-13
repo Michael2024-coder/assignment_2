@@ -3,6 +3,7 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from dice.dice_hand import DiceHand
 from dice.intelligence import Intelligence
@@ -15,11 +16,7 @@ class Game:
         self.dice_hand = DiceHand()
         self.computer_intelligence = Intelligence()
         self.pvp = ["Player 1", "Player 2"]
-        self.pvc = ["Player", "Computer"]
-        self.pvp_scores: dict[str, int] = {player: 0 for player in self.pvp}
-        self.pvc_scores: dict[str, int] = {player: 0 for player in self.pvc}
-        self.current_player_pvp = self.pvp[0]
-        self.current_player_pvc = self.pvc[0]
+        self.pvc = ["Player", "Jarvis AI"]
         self.turn_total = 0
 
     def switch_pvp(self) -> None:
@@ -40,7 +37,7 @@ class Game:
         self.turn_total = 0
 
     def game_mode(self) -> str:
-        print("---------- Game Mode ----------")
+        print("\n---------- Game Mode ----------")
         print("1. Player vs Player\n2. Player vs Computer")
         return input("Choose a game mode (1/2): ")
         
@@ -50,6 +47,7 @@ class Game:
         return input("Choose a game level (1/2/3): ")
         
     def double_one_pvp(self) -> None:
+        print(f"Turn total: {0}")
         print("\nDouble ones! You lose all your points.")
         self.pvp_scores[self.current_player_pvp] = 0
         
@@ -97,6 +95,11 @@ class Game:
                 f"\n----------- ScoreBoard ----------\n"
                 f"    {self.pvc[0]} {[self.pvc_scores[self.pvc[0]]]} - {[self.pvc_scores[self.pvc[1]]]} {self.pvc[1]}"
             )
+    
+    def pause_menu(self) -> str:
+        print("\n----- Paused -----")
+        print("1. Continue\n2. Restart Game\n3. Change Name\n4. Quit Game")
+        return input("Select an option (1/2/3/4): ")
             
     def pvp_play(self, user_choice) -> None:
         """Play a single turn for the current player."""
@@ -104,9 +107,8 @@ class Game:
         print(f"\n{self.current_player_pvp}'s turn:")
         while True:
             result = self.roll()
-
             if result["is_double_one"]:
-                self.double_one_pvc()
+                self.double_one_pvp()
                 break
             
             if result["is_single_one"]:
@@ -118,9 +120,21 @@ class Game:
             if result["must_reroll"]:
                 self.must_reroll()
                 continue
-
-            choice = input("\nRoll again? (y/n): ").strip().lower()
-            if choice != "y":
+            
+            if input("\nPause game? (p): ").strip().lower() == "p":
+                option = self.pause_menu()
+                if option == "1":
+                    pass
+                elif option == "2":
+                    pass #Restart
+                elif option == "3":
+                    pass #change name
+                elif option == "4":
+                    pass #Quit
+            else:
+                pass
+            
+            if input("\nRoll again? (y/n): ").strip().lower() != "y":
                 self.stop_turn_pvp()
                 break
 
@@ -131,15 +145,14 @@ class Game:
         print(f"\n{self.current_player_pvc}'s turn:")
         comp_double_one = False
         while True:
-            if self.current_player_pvc == "Computer":
+            if self.current_player_pvc == self.pvc[1]:
                 result = self.computer_roll()
             else:
                 result = self.roll()
 
             if result["is_double_one"]:
                 self.double_one_pvc()
-                if self.current_player_pvc == "Computer":
-                    comp_double_one = True
+                comp_double_one = self.current_player_pvc == self.pvc[1]
                 break
             
             if result["is_single_one"]:
@@ -152,51 +165,72 @@ class Game:
                 self.must_reroll()
                 continue
 
-            if self.current_player_pvc == "Player":
-                choice = input("\nRoll again? (y/n): ").strip().lower()
-                if choice != "y":
+            if self.current_player_pvc == self.pvc[0]:
+                if input("\nPause game? (p): ").strip().lower() == "p":
+                    option = self.pause_menu()
+                    if option == "1":
+                        pass
+                    elif option == "2":
+                        pass #Restart
+                    elif option == "3":
+                        pass #change name
+                    elif option == "4":
+                        pass #Quit
+                else:
+                    pass
+                
+                if input("\nRoll again? (y/n): ").strip().lower() != "y":
                     self.stop_turn_pvc()
                     break
             
-            elif self.current_player_pvc == "Computer":
+            elif self.current_player_pvc == self.pvc[1]:
                 if level == "1":
                     choice = self.computer_intelligence.easy_level(self.turn_total)
                 elif level == "2":
-                    choice = self.computer_intelligence.medium_level(self.turn_total, self.pvc_scores["Computer"], comp_double_one)
+                    choice = self.computer_intelligence.medium_level(self.turn_total, self.pvc_scores[self.pvc[1]], comp_double_one)
                 elif level == "3":
-                    choice = self.computer_intelligence.hard_level(self.turn_total, self.pvc_scores["Player"], self.pvc_scores["Computer"])
+                    choice = self.computer_intelligence.hard_level(self.turn_total, self.pvc_scores[self.pvc[0]], self.pvc_scores[self.pvc[1]])
                     
                 if choice != "y":
                     self.stop_turn_pvc()
                     break
                 
         self.switch_pvc()
+        
+    def start_pvp_game(self, choice) -> None:
+        self.pvp[0] = input("\nEnter your name Player 1: ")
+        self.pvp[1] = input("Enter your name Player 2: ")
+        self.current_player_pvp = self.pvp[0]
+        self.pvp_scores: dict[str, int] = {player: 0 for player in self.pvp}
+        while max(self.pvp_scores.values()) < 100:
+            self.pvp_play(choice)
+                
+        self.scoreboard(choice)
+        winner = max(self.pvp_scores, key=self.pvp_scores.get)
+        print(f"\n🎉 {winner} wins with {self.pvp_scores[winner]} points!") #start over after game #go main menu
+    
+    def start_pvc_game(self, choice) -> None:
+        self.pvc[0] = input("\nEnter your name Player: ")
+        self.pvc_scores: dict[str, int] = {player: 0 for player in self.pvc}
+        self.current_player_pvc = self.pvc[0]
+        level = self.game_level()
+        while max(self.pvc_scores.values()) < 100:
+            self.pvc_play(choice, level)
+                
+        self.scoreboard(choice)
+        winner = max(self.pvc_scores, key=self.pvc_scores.get)
+        print(f"\n🎉 {winner} wins with {self.pvc_scores[winner]} points!")
+
 
     def start_game(self) -> None:
         """Start and manage the full game loop."""
-        print("\n---------- Welcome to Two-Dice Pig! ----------\n")
         choice = self.game_mode()
         
         if choice == "1":
-            while max(self.pvp_scores.values()) < 100:
-                self.pvp_play(choice)
-                
-            self.scoreboard(choice)
-            winner = max(self.pvp_scores, key=self.pvp_scores.get)
-            print(f"\n🎉 {winner} wins with {self.pvp_scores[winner]} points!")
+            self.start_pvp_game(choice)
         
         elif choice == "2":
-            level = self.game_level()
-            while max(self.pvc_scores.values()) < 100:
-                self.pvc_play(choice, level)
-                
-            self.scoreboard(choice)
-            winner = max(self.pvc_scores, key=self.pvc_scores.get)
-            print(f"\n🎉 {winner} wins with {self.pvc_scores[winner]} points!")
+            self.start_pvc_game(choice)
 
 
-if __name__ == "__main__":
-    # Allow running directly from VS Code or terminal
-    sys.path.append(str(Path(__file__).resolve().parent.parent))
-    GAME = Game()
-    GAME.start_game()
+
