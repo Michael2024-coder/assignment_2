@@ -3,7 +3,7 @@
 import unittest
 import os
 from dice.player import Player
-from dice.highScore import HighScore
+from dice.highscore import HighScore
 
 
 class TestHighScore(unittest.TestCase):
