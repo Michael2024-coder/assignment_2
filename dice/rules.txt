@@ -1,0 +1,8 @@
+| 1. The goal is to be the first player to reach 100 points.
+| 2. Players take turns rolling two dice.
+| 3. On your turn, you can roll as many times as you like — the total of your rolls adds to your turn score.
+| 4. You can choose to hold at any time. When you hold, your turn score is added to your total score, and your turn ends.
+| 5. If you roll one 1, you lose all points earned during that turn, and your turn ends.
+| 6. If you roll two 1s (snake eyes), you lose all your points from the entire game, and your turn ends.
+| 7. If you roll doubles (any pair except 1s), you must roll again — you cannot hold.
+| 8. Play continues until a player’s total score reaches 100 or more. That player wins!
