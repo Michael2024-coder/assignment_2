@@ -68,7 +68,28 @@ class TestMain(unittest.TestCase):
         self.assertIn("Games Won: 6", output)
         self.assertIn("Games Lost: 4", output)
 
-    
+    @patch("dice.histogram.Histogram.load_stats_file", return_value={})
+    @patch("dice.player.Player.get_user_id_list", return_value=[])
+    @patch("sys.stdout", new_callable=StringIO)
+    @patch("builtins.input")
+    def test_play_flow(self, mock_input, _mock_stdout, _mock_uids, _mock_stats):
+        """
+        Test the play method flow:
+        Press Enter after rules, choose option 1 to start game, then choose 3 to quit.
+        """
+        mock_input.side_effect = ["", "1", "3"]
+
+        main = Main()
+
+        # Patch start_game to prevent running full game logic
+        with patch.object(main.game, "start_game") as fake_start:
+            # Patch display_rules to prevent printing long text
+            with patch.object(main, "display_rules"):
+                main.play()
+                fake_start.assert_called_once()
+
+        # Ensure the input sequence was followed
+        self.assertEqual(mock_input.call_count, 3)
 
 
 if __name__ == "__main__":
