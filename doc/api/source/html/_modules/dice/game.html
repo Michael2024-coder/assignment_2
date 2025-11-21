@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dice.game &#8212; Assignment_2 v9.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=f0a73b23"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for dice.game</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=too-many-instance-attributes</span>
+<span class="c1"># pylint: disable=too-many-branches</span>
+<span class="c1"># pylint: disable=too-many-statements</span>
+
+<span class="sd">&quot;&quot;&quot;Main game controller for the Two-Dice Pig game.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dice.player</span><span class="w"> </span><span class="kn">import</span> <span class="n">Player</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dice.intelligence</span><span class="w"> </span><span class="kn">import</span> <span class="n">Intelligence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dice.histogram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Histogram</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dice.highscore</span><span class="w"> </span><span class="kn">import</span> <span class="n">HighScore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dice.dice_hand</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiceHand</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Game">
+<a class="viewcode-back" href="../../module.html#dice.game.Game">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Game</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main game controller for Two-Dice Pig.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the game with players, scoring system, and dice mechanics.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dice_hand</span> <span class="o">=</span> <span class="n">DiceHand</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ai_lvl</span> <span class="o">=</span> <span class="n">Intelligence</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">player</span> <span class="o">=</span> <span class="n">Player</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="p">:</span> <span class="n">HighScore</span> <span class="o">=</span> <span class="n">HighScore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Player 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Player 2&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Player&quot;</span><span class="p">,</span> <span class="s2">&quot;Jarvis AI&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Game.switch_pvp">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.switch_pvp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">switch_pvp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to the next player in PvP mode and reset the turn total.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Game.switch_pvc">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.switch_pvc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">switch_pvc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to the next participant in PvC mode and reset turn total.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Game.game_mode">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.game_mode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">game_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display and return the selected game mode (PvP or PvC).&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">---------- Game Mode ----------&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Player vs Player</span><span class="se">\n</span><span class="s2">2. Player vs Computer&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Choose a game mode (1/2): &quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.game_level">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.game_level">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">game_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display and return the selected AI difficulty level.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">---------- Game Level ----------&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Easy</span><span class="se">\n</span><span class="s2">2. Medium</span><span class="se">\n</span><span class="s2">3. Hard&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Choose a game level (1/2/3): &quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.double_one_pvp">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.double_one_pvp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">double_one_pvp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle the event of rolling double ones in PvP mode.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Turn total: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Double ones! You lose all your points.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Game.double_one_pvc">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.double_one_pvc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">double_one_pvc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle the event of rolling double ones in PvC mode.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Turn total: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Double ones! You lose all your points.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Game.add_turn_total">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.add_turn_total">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_turn_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the result of a roll to the current turn total.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">+=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Turn total: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.roll">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.roll">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">roll</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Roll dice for a human player and return the evaluated result.&quot;&quot;&quot;</span>
+
+        <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Press Enter to roll...&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_hand</span><span class="o">.</span><span class="n">evaluate_roll</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rolled: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dice_hand</span><span class="o">.</span><span class="n">display_dice</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Game.computer_roll">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.computer_roll">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">computer_roll</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Roll dice for the AI player and return the evaluated result.&quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_hand</span><span class="o">.</span><span class="n">evaluate_roll</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rolled: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dice_hand</span><span class="o">.</span><span class="n">display_dice</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Game.scoreboard">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.scoreboard">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scoreboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the current scoreboard depending on the game mode.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+            <span class="n">p1_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">p1_score</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+            <span class="n">p2_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">p2_score</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------- ScoreBoard ----------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;   </span><span class="si">{</span><span class="n">p1_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">p1_score</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">p2_score</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">p2_name</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+            <span class="n">p_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">p_score</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+            <span class="n">ai_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">ai_score</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----------- ScoreBoard ----------</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;   </span><span class="si">{</span><span class="n">p_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">p_score</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">ai_score</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">ai_name</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.pause_menu">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.pause_menu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pause_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the pause menu and return the selected option.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">----- Paused -----&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. Continue</span><span class="se">\n</span><span class="s2">2. Restart Game</span><span class="se">\n</span><span class="s2">3. Change Name</span><span class="se">\n</span><span class="s2">4. Quit Game&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Select an option (1/2/3/4): &quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.pvp_play">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.pvp_play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pvp_play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle a full turn cycle for a single player in PvP mode.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoreboard</span><span class="p">(</span><span class="n">user_choice</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="si">}</span><span class="s2">&#39;s turn:&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;is_double_one&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">double_one_pvp</span><span class="p">()</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;is_single_one&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Turn total: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rolled a single one. Turn ends with no points.&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_turn_total</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;must_reroll&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rolled a pair! You must roll again.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pause game? (p): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pause_menu</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">}</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Game Restarted!&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+                    <span class="n">p_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter your user ID: &quot;</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter new name: &quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">update_username</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changes saved.&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;4&quot;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Are you sure you want to quit? &quot;</span><span class="p">)</span>
+                    <span class="n">select</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;All progress will be lost (y/n): &quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">select</span> <span class="o">!=</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">}</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">return</span> <span class="s2">&quot;quit&quot;</span>
+
+            <span class="k">if</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Roll again? (y/n): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span>
+                <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_pvp</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Game.pvc_play">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.pvc_play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pvc_play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle a full turn cycle in PvC mode, including AI decision logic.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoreboard</span><span class="p">(</span><span class="n">user_choice</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span><span class="si">}</span><span class="s2">&#39;s turn:&quot;</span><span class="p">)</span>
+        <span class="n">ai_double_one</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">ai_opt</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computer_roll</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">roll</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;is_double_one&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">double_one_pvc</span><span class="p">()</span>
+                <span class="n">ai_double_one</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;is_single_one&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Turn total: </span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rolled a single one. Turn ends with no points.&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_turn_total</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;must_reroll&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rolled a pair! You must roll again.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Pause game? (p to pause, Enter to continue): &quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">user_input</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span>
+                    <span class="n">option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pause_menu</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">}</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Game Restarted!&quot;</span><span class="p">)</span>
+                        <span class="k">break</span>
+                    <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+                        <span class="n">p_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter your user ID: &quot;</span><span class="p">)</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter new name: &quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">update_username</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">score</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changes saved.&quot;</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s2">&quot;4&quot;</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Are you sure you want to quit? &quot;</span><span class="p">)</span>
+                        <span class="n">select</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;All progress will be lost (y/n): &quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">select</span> <span class="o">!=</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">}</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">return</span> <span class="s2">&quot;quit&quot;</span>
+
+                <span class="k">if</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Roll again? (y/n): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span>
+                    <span class="k">break</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+                    <span class="n">ai_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ai_lvl</span><span class="o">.</span><span class="n">easy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+                    <span class="n">ai_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="n">ai_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ai_lvl</span><span class="o">.</span><span class="n">mid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span><span class="p">,</span> <span class="n">ai_score</span><span class="p">,</span> <span class="n">ai_double_one</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span>
+                    <span class="n">p_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">ai_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="n">ai_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ai_lvl</span><span class="o">.</span><span class="n">hard</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span><span class="p">,</span> <span class="n">p_score</span><span class="p">,</span> <span class="n">ai_score</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">ai_opt</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">turn_total</span>
+                    <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_pvc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Game.player_type">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.player_type">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">player_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine if the user is a new or</span>
+<span class="sd">        returning player and return ID +</span>
+<span class="sd">        username.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;1. New Player</span><span class="se">\n</span><span class="s2">2. Existing Player&quot;</span><span class="p">)</span>
+        <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Select an option (1/2): &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+            <span class="n">input_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter a new user ID Player e.g. Mar580: &quot;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">input_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id_list</span><span class="p">():</span>
+                <span class="n">input_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">User ID Exists!</span><span class="se">\n</span><span class="s2">Enter new ID: &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">input_id</span><span class="p">)</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">set_username</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your name Player: &quot;</span><span class="p">))</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_username</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">update_username</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">username</span>
+        <span class="k">if</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">INFO: Make sure to enter an existing ID on your first try,&quot;</span>
+                <span class="s2">&quot; otherwise you will be asked to create a new one.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">input_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter your existing user ID Player e.g. Mar580: &quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">input_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id_list</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">input_id</span><span class="p">)</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id</span><span class="p">()</span>
+                <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">get_username</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">username</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;User ID Does Not Exist!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">input_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter a new user ID Player e.g. Mar580: &quot;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">input_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id_list</span><span class="p">():</span>
+                <span class="n">input_id</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User ID Exists!</span><span class="se">\n</span><span class="s2">Enter new ID: &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">input_id</span><span class="p">)</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_user_id</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">set_username</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter your name Player: &quot;</span><span class="p">))</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">get_username</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">update_username</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">username</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Game.save_pvp1">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.save_pvp1">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_pvp1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">winner</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save stats for PvP player 1 after a completed match.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_played</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">winner</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_won</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_lost</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">set_highscore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">get_highscore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">check_highscore</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">save_stats</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Game.save_pvp2">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.save_pvp2">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_pvp2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">winner</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save stats for PvP player 2 after a completed match.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_played</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">winner</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_won</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_lost</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">set_highscore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">get_highscore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">check_highscore</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">save_stats</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Game.save_pvc1">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.save_pvc1">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_pvc1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">winner</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save stats for the player in Player vs Computer mode.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_played</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">winner</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_won</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">increment_games_lost</span><span class="p">(</span><span class="n">p_id</span><span class="p">)</span> <span class="c1">#pragma: no cover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">set_highscore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">highscore</span><span class="o">.</span><span class="n">get_highscore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">check_highscore</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">save_stats</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Game.start_pvp_game">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.start_pvp_game">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_pvp_game</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up and run a full Player vs Player match.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">------- Player Selection -------&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&gt;&gt;&gt; Player 1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">p1_id</span><span class="p">,</span> <span class="n">p1_username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player_type</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p1_username</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&gt;&gt;&gt; Player 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">p2_id</span><span class="p">,</span> <span class="n">p2_username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player_type</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2_username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp</span><span class="p">}</span>
+        <span class="n">pause_menu_option</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">while</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">pause_menu_option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvp_play</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pause_menu_option</span> <span class="o">==</span> <span class="s2">&quot;quit&quot;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">pause_menu_option</span> <span class="o">!=</span> <span class="s2">&quot;quit&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scoreboard</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span>
+            <span class="n">winner</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pvp1</span><span class="p">(</span><span class="n">p1_id</span><span class="p">,</span> <span class="n">winner</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pvp2</span><span class="p">(</span><span class="n">p2_id</span><span class="p">,</span> <span class="n">winner</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🎉 </span><span class="si">{</span><span class="n">winner</span><span class="si">}</span><span class="s2"> wins with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pvp_scores</span><span class="p">[</span><span class="n">winner</span><span class="p">]</span><span class="si">}</span><span class="s2"> points!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.start_pvc_game">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.start_pvc_game">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_pvc_game</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up and run a full Player vs Computer match.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">------- Player Selection -------&quot;</span><span class="p">)</span>
+        <span class="n">user_id</span><span class="p">,</span> <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">player_type</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">player</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_player_pvc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_level</span><span class="p">()</span>
+        <span class="n">pause_menu_option</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">while</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">pause_menu_option</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pvc_play</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pause_menu_option</span> <span class="o">==</span> <span class="s2">&quot;quit&quot;</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">pause_menu_option</span> <span class="o">!=</span> <span class="s2">&quot;quit&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scoreboard</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span>
+            <span class="n">winner</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pvc1</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">winner</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🎉 </span><span class="si">{</span><span class="n">winner</span><span class="si">}</span><span class="s2"> wins with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pvc_scores</span><span class="p">[</span><span class="n">winner</span><span class="p">]</span><span class="si">}</span><span class="s2"> points!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.start_game">
+<a class="viewcode-back" href="../../module.html#dice.game.Game.start_game">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_game</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start and manage the overall game flow including mode selection.&quot;&quot;&quot;</span>
+
+        <span class="n">choice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_mode</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_pvp_game</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">choice</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_pvc_game</span><span class="p">(</span><span class="n">choice</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Assignment_2</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Module</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module.html">Assignment_2 Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Maraizu Dominic-Judes, Uchenna Peter and Michael Agunbiade.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
