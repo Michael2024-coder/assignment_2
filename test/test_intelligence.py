@@ -46,7 +46,35 @@ class TestIntelligence(unittest.TestCase):
             "Medium turn count should reset to 5"
             )
 
-    
+    def test_hard_decision_late_game(self):
+        """Test hard AI decision logic near winning score."""
+        # computer close to winning
+        self.assertEqual(
+            self.ai.hard(turn_total=10, player_score=70, computer_score=80),
+            'y',
+            "Should continue rolling if turn_total < remaining points"
+        )
+        self.assertEqual(
+            self.ai.hard(turn_total=20, player_score=70, computer_score=80),
+            'n',
+            "Should stop rolling if turn_total >= remaining points"
+        )
+
+    def test_hard_decision_score_diff(self):
+        """Test hard AI decision logic with normal scores and score differences."""
+        self.assertEqual(
+            self.ai.hard(turn_total=5, player_score=30, computer_score=20),
+            'y',
+            "Should continue rolling if below calculated threshold"
+        )
+        self.assertEqual(
+            self.ai.hard(turn_total=25, player_score=30, computer_score=20),
+            'n',
+            """
+            Should stop rolling if turn_total exceeds threshold based on
+            score difference
+            """
+        )
 
 
 if __name__ == "__main__":
