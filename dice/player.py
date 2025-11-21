@@ -18,7 +18,7 @@ class Player:
         """
         self.__username = ""
         self.__userid = ""
-        self.user_id_list = self.get_user_id_list()
+        self.user_id_list = []
 
     def set_id(self, p_id: str) -> None:
         """
@@ -28,6 +28,7 @@ class Player:
             id (str): The unique identifier to assign to the player.
         """
         self.__userid = p_id
+        self.user_id_list = self.get_user_id_list()
         if self.__userid not in self.user_id_list:
             self.user_id_list.add(self.__userid)
             with open('dice/user_id.ser', 'wb') as ids:
