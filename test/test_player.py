@@ -34,8 +34,5 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(self.p2.get_user_id(), "ID001")
         self.assertIn("ID001", self.p2.user_id_list)
 
-
-
-
 if __name__ == "__main__":
     unittest.main()
