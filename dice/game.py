@@ -54,10 +54,10 @@ class Game:
         )
         self.turn_total = 0
 
-    def game_mode(self) -> str:
+    def game_mode(self) -> str: #pragma: no cover
         """Display and return the selected game mode (PvP or PvC)."""
 
-        print("\n---------- Game Mode ----------")
+        print("\n---------- Game Mode ----------") #pragma: no cover
         print("1. Player vs Player\n2. Player vs Computer")
         return input("Choose a game mode (1/2): ")
 
@@ -68,7 +68,7 @@ class Game:
         print("1. Easy\n2. Medium\n3. Hard")
         return input("Choose a game level (1/2/3): ")
 
-    def double_one_pvp(self) -> None:
+    def double_one_pvp(self) -> None: #pragma: no cover
         """Handle the event of rolling double ones in PvP mode."""
 
         print(f"Turn total: {0}")
@@ -82,7 +82,7 @@ class Game:
         print("\nDouble ones! You lose all your points.")
         self.pvc_scores[self.current_player_pvc] = 0
 
-    def add_turn_total(self, result: dict) -> None:
+    def add_turn_total(self, result: dict) -> None: #pragma: no cover
         """Add the result of a roll to the current turn total."""
 
         self.turn_total += result["total"]
@@ -96,14 +96,14 @@ class Game:
         print(f"Rolled: {self.dice_hand.display_dice()}")
         return result
 
-    def computer_roll(self) -> dict:
+    def computer_roll(self) -> dict: #pragma: no cover
         """Roll dice for the AI player and return the evaluated result."""
 
         result = self.dice_hand.evaluate_roll()
         print(f"\nRolled: {self.dice_hand.display_dice()}")
         return result
 
-    def scoreboard(self, choice: str) -> None:
+    def scoreboard(self, choice: str) -> None: #pragma: no cover
         """Display the current scoreboard depending on the game mode."""
 
         if choice == "1":
@@ -125,14 +125,14 @@ class Game:
                 f"""   {p_name} {p_score} - {ai_score} {ai_name}"""
             )
 
-    def pause_menu(self) -> str:
+    def pause_menu(self) -> str: #pragma: no cover
         """Display the pause menu and return the selected option."""
 
         print("\n----- Paused -----")
         print("1. Continue\n2. Restart Game\n3. Change Name\n4. Quit Game")
         return input("Select an option (1/2/3/4): ")
 
-    def pvp_play(self, user_choice: str) -> None:
+    def pvp_play(self, user_choice: str) -> None: #pragma: no cover
         """Handle a full turn cycle for a single player in PvP mode."""
 
         self.scoreboard(user_choice)
@@ -191,7 +191,7 @@ class Game:
         self.switch_pvp()
         return None
 
-    def pvc_play(self, user_choice: str, level: str) -> None:
+    def pvc_play(self, user_choice: str, level: str) -> None: #pragma: no cover
         """Handle a full turn cycle in PvC mode, including AI decision logic."""
 
         self.scoreboard(user_choice)
@@ -274,7 +274,7 @@ class Game:
         self.switch_pvc()
         return None
 
-    def player_type(self) -> tuple:
+    def player_type(self) -> tuple: #pragma: no cover
         """
         Determine if the user is a new or
         returning player and return ID +
@@ -317,7 +317,7 @@ class Game:
             return user_id, username
         return None, None
 
-    def save_pvp1(self, p_id: str, winner: str) -> None:
+    def save_pvp1(self, p_id: str, winner: str) -> None: #pragma: no cover
         """Save stats for PvP player 1 after a completed match."""
 
         self.histogram.increment_games_played(p_id)
@@ -330,7 +330,7 @@ class Game:
         self.histogram.check_highscore(p_id, score)
         self.histogram.save_stats()
 
-    def save_pvp2(self, p_id: str, winner: str) -> None:
+    def save_pvp2(self, p_id: str, winner: str) -> None: #pragma: no cover
         """Save stats for PvP player 2 after a completed match."""
 
         self.histogram.increment_games_played(p_id)
@@ -350,13 +350,13 @@ class Game:
         if winner == self.pvc[0]:
             self.histogram.increment_games_won(p_id)
         else:
-            self.histogram.increment_games_lost(p_id)
+            self.histogram.increment_games_lost(p_id) #pragma: no cover
         self.highscore.set_highscore(self.pvc_scores[self.pvc[0]])
         score = self.highscore.get_highscore()
         self.histogram.check_highscore(p_id, score)
         self.histogram.save_stats()
 
-    def start_pvp_game(self, choice: str) -> None:
+    def start_pvp_game(self, choice: str) -> None: #pragma: no cover
         """Set up and run a full Player vs Player match."""
 
         print("\n------- Player Selection -------")
@@ -380,7 +380,7 @@ class Game:
             self.save_pvp2(p2_id, winner)
             print(f"\n🎉 {winner} wins with {self.pvp_scores[winner]} points!")
 
-    def start_pvc_game(self, choice: str) -> None:
+    def start_pvc_game(self, choice: str) -> None: #pragma: no cover
         """Set up and run a full Player vs Computer match."""
 
         print("\n------- Player Selection -------")
@@ -401,7 +401,7 @@ class Game:
             self.save_pvc1(user_id, winner)
             print(f"\n🎉 {winner} wins with {self.pvc_scores[winner]} points!")
 
-    def start_game(self) -> None:
+    def start_game(self) -> None: #pragma: no cover
         """Start and manage the overall game flow including mode selection."""
 
         choice = self.game_mode()

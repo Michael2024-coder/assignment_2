@@ -116,8 +116,8 @@ python -m coverage html
 ---
 
 ## Generating documentation
-
-
+To generate the documentation:
+make doc
 
 # Generating uml diagrams
 We used Pyreverse (from Pylint) to generate UML diagrams.
