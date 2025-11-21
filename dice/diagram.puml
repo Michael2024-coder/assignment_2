@@ -1,0 +1,100 @@
+@startuml
+title Two-Dice Pig Game UML (8 classes)
+
+class Dice {
+  -sides: int
+  -value: int
+  +__init__(sides=6)
+  +roll(): int
+  +get_unicode(): str
+  +__str__(): str
+}
+
+class DiceHand {
+  -left_die: Dice
+  -right_die: Dice
+  +__init__()
+  +roll(): (int, int)
+  +evaluate_roll(): dict
+  +display_dice(): str
+}
+
+class Player {
+  -__username: str
+  -__userid: str
+  -user_id_list: list
+  +set_id(p_id: str)
+  +set_username(name: str)
+  +get_user_id_list(): list
+  +get_user_id(): str
+  +get_username(): str
+}
+
+class HighScore {
+  -high_score: int
+  +set_highscore(score: int)
+  +get_highscore(): int
+}
+
+class Histogram {
+  -details: dict
+  +increment_games_played(p_id: str)
+  +increment_games_won(p_id: str)
+  +increment_games_lost(p_id: str)
+  +update_username(p_id: str, name: str)
+  +get_username(p_id: str): str
+  +check_highscore(p_id: str, score: int)
+  +save_stats()
+  +load_stats_file(): dict
+}
+
+class Intelligence {
+  +easy(turn_total: int): str
+  +mid(turn_total: int, ai_score: int, ai_double_one: bool): str
+  +hard(turn_total: int, p_score: int, ai_score: int): str
+}
+
+class Game {
+  -dice_hand: DiceHand
+  -ai_lvl: Intelligence
+  -player: Player
+  -histogram: Histogram
+  -highscore: HighScore
+  -pvp: list
+  -pvc: list
+  -turn_total: int
+  -current_player_pvp: str
+  -current_player_pvc: str
+  -pvp_scores: dict
+  -pvc_scores: dict
+  +start_game()
+  +start_pvp_game(choice: str)
+  +start_pvc_game(choice: str)
+  +pvp_play(user_choice: str)
+  +pvc_play(user_choice: str, level: str)
+  +scoreboard(choice: str)
+  +pause_menu(): str
+  +roll(): dict
+  +computer_roll(): dict
+  +switch_pvp(): void
+  +switch_pvc(): void
+}
+
+class Main {
+  -game: Game
+  -histogram: Histogram
+  +menu(): str
+  +display_rules()
+  +display_stats()
+  +play()
+}
+
+DiceHand *-- Dice
+Game --> DiceHand
+Game --> Player
+Game --> Histogram
+Game --> HighScore
+Game --> Intelligence
+Main --> Game
+Main --> Histogram
+@enduml

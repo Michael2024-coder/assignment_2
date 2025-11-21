@@ -25,7 +25,7 @@ class Game:
         self.ai_lvl = Intelligence()
         self.player = Player()
         self.histogram = Histogram()
-        self.highscore = HighScore()
+        self.highscore: HighScore = HighScore()
         self.pvp = ["Player 1", "Player 2"]
         self.pvc = ["Player", "Jarvis AI"]
         self.turn_total = 0
