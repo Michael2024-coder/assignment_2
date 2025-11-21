@@ -18,7 +18,7 @@ class Player:
         """
         self.__username = ""
         self.__userid = ""
-        self.user_id_list = []
+        self.user_id_list = self.get_user_id_list()
 
     def set_id(self, p_id: str) -> None:
         """
@@ -28,10 +28,9 @@ class Player:
             id (str): The unique identifier to assign to the player.
         """
         self.__userid = p_id
-        self.user_id_list = self.get_user_id_list()
         if self.__userid not in self.user_id_list:
             self.user_id_list.add(self.__userid)
-            with open('dice/user_id.ser', 'wb') as ids:
+            with open('dice\\user_id.ser', 'wb') as ids:
                 pickle.dump(self.user_id_list, ids)
 
     def set_username(self, name: str) -> None:
@@ -50,9 +49,12 @@ class Player:
         Returns:
             list: A list of existing user IDs.
         """
-        with open('dice/user_id.ser', 'rb') as ids:
-            user_id_list = pickle.load(ids)
-        return user_id_list
+        try:
+            with open('dice\\user_id.ser', 'rb') as ids:
+                user_id_list = pickle.load(ids)
+            return user_id_list
+        except FileNotFoundError:
+            return {}
 
     def get_user_id(self) -> str:
         """

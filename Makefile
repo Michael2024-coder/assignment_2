@@ -47,6 +47,9 @@ clean:
 	rm -f .coverage *.pyc
 	rm -rf __pycache__
 	rm -rf htmlcov
+	@echo "Cleaning up..."
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	
 
 clean-doc: clean
 	@$(call MESSAGE,$@)
@@ -86,21 +89,25 @@ codestyle: black
 #
 unittest:
 	@$(call MESSAGE,$@)
-	 $(PYTHON) -m unittest discover
+	$(PYTHON) -m unittest discover
 
 coverage:
 	@$(call MESSAGE,$@)
 	coverage run -m unittest discover
 	coverage html
 	coverage report -m
+	@echo "Running tests with coverage..."
+	pytest --cov=dice --cov-report=term-missing -v
 
 coverage-xml:
 	@$(call MESSAGE,$@)
 	coverage run -m unittest discover
 	coverage xml
 
-test: lint coverage
-
+test:
+    lint coverage
+	@echo "Running all unit tests..."
+	pytest -v
 
 # ---------------------------------------------------------
 # Work with generating documentation.
@@ -161,3 +168,4 @@ metrics: radon-cc radon-mi radon-raw radon-hal cohesion
 bandit:
 	@$(call MESSAGE,$@)
 	bandit --recursive dice
+
