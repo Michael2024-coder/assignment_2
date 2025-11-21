@@ -1,9 +1,11 @@
-"""Unit tests for the Player class.
+"""
+Simple unit tests for the Player class.
 
-These tests cover username validation, score resetting, and initial game statistics.
+These tests cover username and user ID handling.
 """
 
 import unittest
+import pickle
 from dice.player import Player
 
 
@@ -11,32 +13,28 @@ class TestPlayer(unittest.TestCase):
     """Test suite for verifying Player class functionality."""
 
     def setUp(self):
-        """Initialize sample players for testing."""
-        self.p1 = Player("Michael")
-        self.p2 = Player("Ngozi")
-        self.p3 = Player("Apan")
+        """Prepare an empty user_id.ser file and create Player objects."""
+        # Make sure the ID file exists and contains an empty set
+        with open("dice/user_id.ser", "wb") as f:
+            pickle.dump(set(), f)
 
-    def test_initial_stats(self):
-        """Test that initial stats are set to zero."""
-        stats = self.p1.get_stats()
-        self.assertEqual(stats["score"], 0)
-        self.assertEqual(stats["games_played"], 0)
+        # Create simple Player objects
+        self.p1 = Player()
+        self.p2 = Player()
+        self.p3 = Player()
 
-    def test_change_username_valid(self):
-        """Test that a valid username change is applied correctly."""
-        self.p2.change_username("Big Mike")
-        self.assertEqual(self.p2.get_username(), "Big Mike")
+    def test_set_username(self):
+        """Test setting a username."""
+        self.p1.set_username("Michael")
+        self.assertEqual(self.p1.get_username(), "Michael")
 
-    def test_change_username_invalid(self):
-        """Test that an invalid username raises ValueError."""
-        with self.assertRaises(ValueError):
-            self.p3.change_username("876")
+    def test_set_id(self):
+        """Test setting a new user ID."""
+        self.p2.set_id("ID001")
+        self.assertEqual(self.p2.get_user_id(), "ID001")
+        self.assertIn("ID001", self.p2.user_id_list)
 
-    def test_score_reset(self):
-        """Test that reset_score sets current_score to zero."""
-        self.p2.current_score = 50
-        self.p2.reset_score()
-        self.assertEqual(self.p2.current_score, 0)
+
 
 
 if __name__ == "__main__":
