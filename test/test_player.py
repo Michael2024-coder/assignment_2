@@ -34,5 +34,17 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(self.p2.get_user_id(), "ID001")
         self.assertIn("ID001", self.p2.user_id_list)
 
+    def test_set_multiple_ids(self):
+        """Test that multiple players do not overwrite each other's IDs."""
+        self.p1.set_id("A1")
+        self.p2.set_id("B2")
+
+        self.assertEqual(self.p1.get_user_id(), "A1")
+        self.assertEqual(self.p2.get_user_id(), "B2")
+
+    def test_username_starts_empty(self):
+        """Test that username is initially empty."""
+        self.assertEqual(self.p3.get_username(), "")
+
 if __name__ == "__main__":
     unittest.main()
