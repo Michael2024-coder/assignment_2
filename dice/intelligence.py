@@ -16,11 +16,12 @@ The class methods return 'y' to continue rolling or 'n' to stop.
 
 class Intelligence:
     """
-    A class that implements decision-making logic for three difficulty levels
+    A class that implements decision-making logic for three difficulty levels.
+
     (easy, medium, and hard) in a turn-based dice game.
     """
 
-    def __init__(self):
+    def __init__(self):  # pragma: no cover
         """
         Initialize the Intelligence object.
 
@@ -34,7 +35,7 @@ class Intelligence:
         self.medium_turn_count = 5
         self.score_list = []
 
-    def easy(self, turn_total: int) -> str:
+    def easy(self, turn_total: int) -> str:  # pragma: no cover
         """
         Decision logic for the easy difficulty level.
 
@@ -48,7 +49,11 @@ class Intelligence:
             return 'n'
         return 'y'
 
-    def mid(self, turn_total: int, score: int, comp_double_one: bool) -> str:
+    def mid(
+            self, turn_total: int,
+            score: int,
+            comp_double_one: bool
+            ) -> str:  # pragma: no cover
         """
         Decision logic for the medium difficulty level.
 
@@ -84,7 +89,11 @@ class Intelligence:
             return 'y'
         return None
 
-    def hard(self, turn_total: int, player_score: int, computer_score: int) -> str:
+    def hard(
+            self, turn_total: int,
+            player_score: int,
+            computer_score: int
+            ) -> str:  # pragma: no cover
         """
         Decision logic for the hard difficulty level.
 

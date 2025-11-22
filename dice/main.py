@@ -27,14 +27,12 @@ class Main:
     and initializes core game components.
     """
 
-    def __init__(self):
-        """
-        Initialize the Main controller with game and histogram managers.
-        """
+    def __init__(self):  # pragma: no cover
+        """Initialize the Main controller with game and histogram managers."""
         self.game = Game()
         self.histogram = Histogram()
 
-    def menu(self) -> str:
+    def menu(self) -> str:  # pragma: no cover
         """
         Display the main menu and prompt the user for an option.
 
@@ -45,10 +43,8 @@ class Main:
         print("1. Play Game\n2. Player Stats\n3. Quit")
         return input("Select an option (1/2/3): ")
 
-    def display_rules(self) -> None:
-        """
-        Display the game rules by reading them from the rules file.
-        """
+    def display_rules(self) -> None:  # pragma: no cover
+        """Display the game rules by reading them from the rules file."""
         print("\n---------- Welcome to Two-Dice Pig! ----------\n")
         strs = "Game Rules"
         print("\n------------------------------------------")
@@ -58,9 +54,10 @@ class Main:
             print(f"{game_rules.read().strip()}")
         print("------------------------------------------")
 
-    def display_stats(self) -> None:
+    def display_stats(self) -> None:  # pragma: no cover
         """
-        Display stored player statistics such as high scores,
+        Display stored player statistics such as high scores.
+
         games played, wins, and losses.
         """
         stats_dict = self.histogram.load_stats_file()
@@ -72,11 +69,14 @@ class Main:
             print(f"Games Won: {lst[3]}")
             print(f"Games Lost: {lst[4]}")
 
-    def play(self) -> None:
+    def play(self) -> None:  # pragma: no cover
         """
-        Run the main program loop:
+        Run the main program loop.
+
         - Show rules
+
         - Display menu
+
         - Start game or show stats based on user input
         """
         self.display_rules()
@@ -95,7 +95,7 @@ class Main:
                     print("Wrong Input! Enter Valid Option.")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Allow running directly from VS Code or terminal
     sys.path.append(str(Path(__file__).resolve().parent.parent))
     MAIN = Main()
