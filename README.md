@@ -106,26 +106,28 @@ python -m dice.main
 
 ## Running tests
 Run all tests using:
-python -m unittest discover -s test -v
+make test
 
 Check test coverage:
-python -m coverage run -m unittest discover -s test
-python -m coverage report -m
-python -m coverage html
+make coverage
 
 ---
 
 ## Generating documentation
-To generate the documentation:
+Generate the documentation:
 make doc
 
 # Generating uml diagrams
-We used Pyreverse (from Pylint) to generate UML diagrams.
-1. Ensure Pylint is installed:
-pip install pylint
+You must install Graphviz manually for UML generation.
 
-2. Generate class diagrams:
-pyreverse -o png -p TwoDicePigGame dice/
+Windows: https://graphviz.org/download/
+Linux:   sudo apt install graphviz
+Mac:     brew install graphviz
+
+After installation, ensure the Graphviz /bin folder is added to your PATH.
+
+Generate UML diagrams.
+make uml
 
 ---
 
@@ -144,8 +146,7 @@ Developer Guide
 
 ## Code quality
 Run linting and static analysis:
-pylint dice/ test/
-flake8 .
+make lint
 
 ---
 

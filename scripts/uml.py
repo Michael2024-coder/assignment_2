@@ -5,7 +5,7 @@ import sys
 import shutil
 
 # Paths
-SOURCE_DIR = "package"  # replace with your actual package folder
+SOURCE_DIR = "dice"  # replace with your actual package folder
 OUTPUT_DIR = os.path.join("doc", "uml")
 PROJECT_NAME = "uml"
 
