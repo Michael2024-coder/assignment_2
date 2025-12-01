@@ -56,7 +56,7 @@ class Player:
                 user_id_list = pickle.load(ids)
             return user_id_list
         except FileNotFoundError:
-            return {}
+            return set()
 
     def get_user_id(self) -> str:  # pragma: no cover
         """
