@@ -50,7 +50,7 @@ class Main:
         print("\n------------------------------------------")
         print(f"| {strs:^38s}")
         print("------------------------------------------")
-        with open('dice\\rules.txt', 'r', encoding='utf-8') as game_rules:
+        with open('dice/rules.txt', 'r', encoding='utf-8') as game_rules:
             print(f"{game_rules.read().strip()}")
         print("------------------------------------------")
 

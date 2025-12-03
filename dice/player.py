@@ -32,7 +32,7 @@ class Player:
         self.__userid = p_id
         if self.__userid not in self.user_id_list:
             self.user_id_list.add(self.__userid)
-            with open('dice\\user_id.ser', 'wb') as ids:
+            with open('dice/user_id.ser', 'wb') as ids:
                 pickle.dump(self.user_id_list, ids)
 
     def set_username(self, name: str) -> None:  # pragma: no cover
@@ -52,7 +52,7 @@ class Player:
             list: A list of existing user IDs.
         """
         try:
-            with open('dice\\user_id.ser', 'rb') as ids:
+            with open('dice/user_id.ser', 'rb') as ids:
                 user_id_list = pickle.load(ids)
             return user_id_list
         except FileNotFoundError:

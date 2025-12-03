@@ -138,7 +138,7 @@ class Histogram:
 
     def save_stats(self) -> None:  # pragma: no cover
         """Save all current player statistics to the serialized stats file."""
-        with open("dice\\history.ser", "wb") as f:
+        with open("dice/history.ser", "wb") as f:
             pickle.dump(self.details, f)
 
     def load_stats_file(self) -> dict:  # pragma: no cover
@@ -148,6 +148,6 @@ class Histogram:
         Returns:
             dict: A dictionary containing all stored player statistics.
         """
-        with open("dice\\history.ser", "rb") as f:
+        with open("dice/history.ser", "rb") as f:
             details = pickle.load(f)
         return details
